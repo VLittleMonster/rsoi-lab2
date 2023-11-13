@@ -1,0 +1,15 @@
+postgres_db:
+  user: program
+  password: test
+  db_name: loyalties  # loyalties
+  host: loyalties
+  port: 5432
+
+loyalty_app:
+  host: "0.0.0.0"
+  external_ip: "212.233.72.15"
+  prefix: "/api/v1/loyalty"
+  port: 8050
+  log_level: "info"
+  reload: True
+

@@ -1,0 +1,15 @@
+postgres_db:
+  user: program
+  password: test
+  db_name: payments             # postgres
+  host: payments
+  port: 5432
+
+payment_app:
+  host: "0.0.0.0"
+  external_ip: "212.233.72.15"
+  prefix: "/api/v1/payments"
+  port: 8060
+  log_level: "info"
+  reload: True
+
