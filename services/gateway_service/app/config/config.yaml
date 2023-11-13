@@ -1,0 +1,16 @@
+gateway_app:
+  host: "0.0.0.0"
+  external_ip: "212.233.72.15"
+  port: 8080
+  prefix: "/api/v1"
+  log_level: "info"
+  reload: True
+
+  reservation_serv_host: "reservation_service"
+  reservation_serv_port: 8070
+
+  payment_serv_host: "payment_service"
+  payment_serv_port: 8060
+
+  loyalty_serv_host: "loyalty_service"
+  loyalty_serv_port: 8050
