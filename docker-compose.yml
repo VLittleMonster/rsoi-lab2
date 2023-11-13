@@ -1,20 +1,112 @@
 version: "3"
 services:
-  postgres:
-    image: library/postgres:13
-    container_name: postgres
-    restart: on-failure
+  loyalties:
+    image: library/postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: postgres
+      - POSTGRES_USER=program
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=loyalties
+    networks:
+      - default
     volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./postgres/:/docker-entrypoint-initdb.d/
+      - db-loyalties:/var/lib/postgresql/data
+      - ./services/loyalty_service/sql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U program"]
+      interval: 2s
+      timeout: 2s
+      retries: 1
+    
 
-# TODO добавить сервисы
+#============================================================EXPEREMENTS====================================================
+  payments:
+    image: library/postgres:16-alpine
+    environment:
+      - POSTGRES_USER=program
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=payments
+    networks:
+      - default
+    volumes:
+      - db-payments:/var/lib/postgresql/data
+      #- ./postgres/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U program"]
+      interval: 2s
+      timeout: 2s
+      retries: 1
+
+
+  reservations:
+    image: library/postgres:16-alpine
+    environment:
+      - POSTGRES_USER=program
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=reservations
+    networks:
+      - default
+    volumes:
+      - db-reservations:/var/lib/postgresql/data
+      - ./services/reservation_service/sql/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U program"]
+      interval: 2s
+      timeout: 2s
+      retries: 1
+
+
+#============================================================END OF EXPEREMENTS====================================================
+  gateway_service:
+    image: gateway_service
+    build: ./services/gateway_service
+    ports:
+      - "8080:8080"
+    networks:
+      - default
+  
+  loyalty_service:
+    image: loyalty_service
+    build: ./services/loyalty_service
+    depends_on:
+      loyalties:
+        condition: service_healthy
+    ports:
+      - "8050:8050"
+    networks:
+      - default
+  
+  payment_service:
+    image: payment_service
+    build: ./services/payment_service
+    depends_on:
+      payments:
+        condition: service_healthy
+    ports:
+      - "8060:8060"
+    networks:
+      - default
+  
+  reservation_service:
+    image: reservation_service
+    build: ./services/reservation_service
+    depends_on:
+      reservations:
+        condition: service_healthy
+    ports:
+      - "8070:8070"
+    networks:
+      - default
 
 volumes:
-  db-data:
+  db-loyalties:
+  db-reservations:
+  db-payments:
+  
+networks:
+  default:
